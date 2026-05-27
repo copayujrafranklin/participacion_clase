@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="row">
+    <!-- COLUMNA IZQUIERDA: MIEMBROS -->
+    <div class="col-md-5">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0">👥 Agregar Miembro</h4>
+            </div>
+            <div class="card-body">
+                <form action="/miembro/agregar" method="POST">
+                    <div class="mb-3">
+                        <label for="nombre" class="form-label">Nombre</label>
+                        <input type="text" class="form-control" id="nombre" name="nombre" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100">➕ Agregar Miembro</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-header bg-info text-white">
+                <h4 class="mb-0">📋 Lista de Miembros</h4>
+            </div>
+            <div class="card-body">
+                {% if miembros %}
+                    <div class="list-group">
+                        {% for miembro in miembros %}
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>{{ miembro.nombre }}</strong><br>
+                                        <small class="text-muted">{{ miembro.email }}</small>
+                                    </div>
+                                    <div>
+                                        <!-- Botón Editar (abre modal) -->
+                                        <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editarMiembroModal{{ miembro.id }}">✏️</button>
+                                        <a href="/miembro/eliminar/{{ miembro.id }}" class="btn btn-sm btn-danger" onclick="return confirm('¿Eliminar miembro?')">🗑️</a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Modal Editar Miembro -->
+                            <div class="modal fade" id="editarMiembroModal{{ miembro.id }}" tabindex="-1">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Editar Miembro</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <form action="/miembro/editar/{{ miembro.id }}" method="POST">
+                                            <div class="modal-body">
+                                                <div class="mb-3">
+                                                    <label class="form-label">Nombre</label>
+                                                    <input type="text" name="nombre" class="form-control" value="{{ miembro.nombre }}" required>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Email</label>
+                                                    <input type="email" name="email" class="form-control" value="{{ miembro.email }}" required>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                                <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">No hay miembros registrados.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- COLUMNA DERECHA: TAREAS -->
+    <div class="col-md-7">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-warning">
+                <h4 class="mb-0">✅ Agregar Tarea</h4>
+            </div>
+            <div class="card-body">
+                <form action="/tarea/agregar" method="POST">
+                    <div class="mb-3">
+                        <label for="titulo" class="form-label">Título</label>
+                        <input type="text" class="form-control" id="titulo" name="titulo" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="descripcion" class="form-label">Descripción</label>
+                        <textarea class="form-control" id="descripcion" name="descripcion" rows="2"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="miembro_id" class="form-label">Asignar a miembro (opcional)</label>
+                        <select class="form-control" id="miembro_id" name="miembro_id">
+                            <option value="">-- Sin asignar --</option>
+                            {% for miembro in miembros %}
+                                <option value="{{ miembro.id }}">{{ miembro.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-warning w-100">➕ Agregar Tarea</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-header bg-dark text-white">
+                <h4 class="mb-0">📌 Lista de Tareas</h4>
+            </div>
+            <div class="card-body">
+                {% if tareas %}
+                    <div class="list-group">
+                        {% for tarea in tareas %}
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <input type="checkbox" class="form-check-input me-2" {% if tarea.completada %}checked{% endif %} onclick="location.href='/tarea/completar/{{ tarea.id }}'">
+                                        <strong class="{% if tarea.completada %}text-decoration-line-through{% endif %}">
+                                            {{ tarea.titulo }}
+                                        </strong>
+                                        <br>
+                                        <small class="text-muted">{{ tarea.descripcion[:100] }}</small>
+                                        <br>
+                                        <small class="badge bg-secondary">
+                                            👤 {{ tarea.miembro.nombre if tarea.miembro else 'Sin asignar' }}
+                                        </small>
+                                    </div>
+                                    <div>
+                                        <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editarTareaModal{{ tarea.id }}">✏️</button>
+                                        <a href="/tarea/eliminar/{{ tarea.id }}" class="btn btn-sm btn-danger" onclick="return confirm('¿Eliminar tarea?')">🗑️</a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Modal Editar Tarea -->
+                            <div class="modal fade" id="editarTareaModal{{ tarea.id }}" tabindex="-1">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Editar Tarea</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <form action="/tarea/editar/{{ tarea.id }}" method="POST">
+                                            <div class="modal-body">
+                                                <div class="mb-3">
+                                                    <label class="form-label">Título</label>
+                                                    <input type="text" name="titulo" class="form-control" value="{{ tarea.titulo }}" required>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Descripción</label>
+                                                    <textarea name="descripcion" class="form-control" rows="2">{{ tarea.descripcion }}</textarea>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Asignar a miembro</label>
+                                                    <select name="miembro_id" class="form-control">
+                                                        <option value="">-- Sin asignar --</option>
+                                                        {% for miembro in miembros %}
+                                                            <option value="{{ miembro.id }}" {% if tarea.miembro_id == miembro.id %}selected{% endif %}>
+                                                                {{ miembro.nombre }}
+                                                            </option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                                <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">No hay tareas registradas.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
