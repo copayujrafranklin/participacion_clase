@@ -4,3 +4,9 @@ instance/
 migrations/
 .env
 *.pyc
+.DS_Store
+*.log
+config_local.py
+*.sqlite3
+.vscode/
+.idea/

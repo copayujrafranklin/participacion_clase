@@ -6,11 +6,38 @@
     <title>Sistema de Miembros y Tareas</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .nav-tabs .nav-link {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #0d6efd;
+        }
+        .nav-tabs .nav-link.active {
+            font-weight: bold;
+            background-color: #0d6efd;
+            color: white;
+            border-color: #0d6efd;
+        }
+        .tab-content {
+            padding: 20px 0;
+        }
+    </style>
 </head>
 <body>
-    <nav class="navbar navbar-dark bg-primary mb-4">
+    <nav class="navbar navbar-dark bg-primary mb-3">
         <div class="container">
             <span class="navbar-brand h1">📋 Sistema de Miembros y Tareas</span>
+            <div class="d-flex">
+                {% if current_user.is_authenticated %}
+                    <span class="navbar-text me-3 text-white">
+                        👋 Bienvenido, {{ current_user.username }}
+                    </span>
+                    <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-light btn-sm">Cerrar Sesión</a>
+                {% else %}
+                    <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-sm me-2">Iniciar Sesión</a>
+                    <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-sm">Registrarse</a>
+                {% endif %}
+            </div>
         </div>
     </nav>
 
@@ -32,5 +59,26 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Mantener la pestaña activa después de recargar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            const activeTab = localStorage.getItem('activeTab');
+            if (activeTab) {
+                const tab = document.querySelector(`button[data-bs-tab="${activeTab}"]`);
+                if (tab) {
+                    const bsTab = new bootstrap.Tab(tab);
+                    bsTab.show();
+                }
+            }
+            
+            // Guardar la pestaña activa al hacer clic
+            const tabs = document.querySelectorAll('button[data-bs-toggle="tab"]');
+            tabs.forEach(tab => {
+                tab.addEventListener('shown.bs.tab', function(event) {
+                    localStorage.setItem('activeTab', event.target.getAttribute('data-bs-tab'));
+                });
+            });
+        });
+    </script>
 </body>
 </html>

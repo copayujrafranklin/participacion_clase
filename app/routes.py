@@ -1,10 +1,12 @@
 from flask import render_template, request, redirect, url_for, flash
+from flask_login import login_required, current_user
 from app import db
 from app.models import Miembro, Tarea
 
 def register_routes(app):
     
     @app.route('/')
+    @login_required
     def home():
         miembros = Miembro.query.all()
         tareas = Tarea.query.all()
@@ -12,6 +14,7 @@ def register_routes(app):
 
     # ========== CRUD MIEMBROS ==========
     @app.route('/miembro/agregar', methods=['POST'])
+    @login_required
     def agregar_miembro():
         nombre = request.form.get('nombre')
         email = request.form.get('email')
@@ -25,6 +28,7 @@ def register_routes(app):
         return redirect(url_for('home'))
 
     @app.route('/miembro/editar/<int:id>', methods=['POST'])
+    @login_required
     def editar_miembro(id):
         miembro = Miembro.query.get_or_404(id)
         miembro.nombre = request.form.get('nombre')
@@ -34,6 +38,7 @@ def register_routes(app):
         return redirect(url_for('home'))
 
     @app.route('/miembro/eliminar/<int:id>')
+    @login_required
     def eliminar_miembro(id):
         miembro = Miembro.query.get_or_404(id)
         db.session.delete(miembro)
@@ -43,6 +48,7 @@ def register_routes(app):
 
     # ========== CRUD TAREAS ==========
     @app.route('/tarea/agregar', methods=['POST'])
+    @login_required
     def agregar_tarea():
         titulo = request.form.get('titulo')
         descripcion = request.form.get('descripcion')
@@ -57,6 +63,7 @@ def register_routes(app):
         return redirect(url_for('home'))
 
     @app.route('/tarea/completar/<int:id>')
+    @login_required
     def completar_tarea(id):
         tarea = Tarea.query.get_or_404(id)
         tarea.completada = not tarea.completada
@@ -65,6 +72,7 @@ def register_routes(app):
         return redirect(url_for('home'))
 
     @app.route('/tarea/editar/<int:id>', methods=['POST'])
+    @login_required
     def editar_tarea(id):
         tarea = Tarea.query.get_or_404(id)
         tarea.titulo = request.form.get('titulo')
@@ -75,6 +83,7 @@ def register_routes(app):
         return redirect(url_for('home'))
 
     @app.route('/tarea/eliminar/<int:id>')
+    @login_required
     def eliminar_tarea(id):
         tarea = Tarea.query.get_or_404(id)
         db.session.delete(tarea)
